@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SC Reports — Stage 1 Test</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Cabinet+Grotesk:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #07080f;
+    --s1: #0e0f1a;
+    --s2: #141525;
+    --border: #252740;
+    --accent: #5b6af0;
+    --green: #3ecf8e;
+    --pink: #e05c8a;
+    --amber: #f0a444;
+    --text: #dde1f5;
+    --muted: #5a5e80;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Cabinet Grotesk', sans-serif; padding: 40px 32px; min-height: 100vh; }
+
+  h1 { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+  .sub { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); margin-bottom: 32px; }
+
+  /* STATUS CARD */
+  .status-card {
+    background: var(--s1); border: 1px solid var(--border); border-radius: 14px;
+    padding: 24px; max-width: 560px; margin-bottom: 32px;
+  }
+  .status-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .status-row:last-child { margin-bottom: 0; }
+  .status-label { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); }
+  .status-val { font-family: 'DM Mono', monospace; font-size: 12px; display: flex; align-items: center; gap: 8px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
+  .dot.ok    { background: var(--green);  box-shadow: 0 0 8px var(--green);  animation: pulse 2s infinite; }
+  .dot.err   { background: var(--pink);   box-shadow: 0 0 8px var(--pink); }
+  .dot.spin  { background: var(--amber);  box-shadow: 0 0 8px var(--amber); animation: pulse .6s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  /* BUTTON */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 22px; border-radius: 9px; border: none; cursor: pointer;
+    font-family: 'Cabinet Grotesk', sans-serif; font-weight: 700; font-size: 14px;
+    background: var(--accent); color: #fff; transition: all .18s; margin-bottom: 28px;
+  }
+  .btn:hover:not(:disabled) { background: #6b7af5; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(91,106,240,.35); }
+  .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+  /* LOG */
+  .log {
+    background: var(--s1); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 20px; max-width: 560px; margin-bottom: 28px;
+    font-family: 'DM Mono', monospace; font-size: 12px; line-height: 1.8;
+    max-height: 180px; overflow-y: auto;
+  }
+  .log-line { color: var(--muted); }
+  .log-line.ok   { color: var(--green); }
+  .log-line.err  { color: var(--pink); }
+  .log-line.info { color: var(--accent); }
+
+  /* COMPANY LIST */
+  .section-title {
+    font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 14px;
+  }
+  .company-list {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px; max-width: 860px;
+  }
+  .company-item {
+    background: var(--s1); border: 1.5px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; cursor: pointer; transition: all .15s;
+  }
+  .company-item:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .company-item.selected { border-color: var(--accent); background: rgba(91,106,240,.1); }
+  .company-item.selected::after { content: ' ✓'; color: var(--accent); }
+  .c-name { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+  .c-id   { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
+
+  .selected-banner {
+    background: rgba(91,106,240,.1); border: 1px solid var(--accent);
+    border-radius: 10px; padding: 14px 18px; max-width: 560px;
+    margin-top: 24px; font-size: 14px; display: none;
+  }
+  .selected-banner strong { color: var(--accent); }
+
+  .spinner-inline {
+    width: 18px; height: 18px; border: 2px solid var(--border);
+    border-top-color: var(--accent); border-radius: 50%;
+    animation: spin .7s linear infinite; flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<h1>SC Reports Hub</h1>
+<p class="sub">Stage 1 — Connection &amp; Company List</p>
+
+<!-- STATUS CARD -->
+<div class="status-card">
+  <div class="status-row">
+    <span class="status-label">Gateway URL</span>
+    <span class="status-val" id="gatewayUrl">—</span>
+  </div>
+  <div class="status-row">
+    <span class="status-label">Health Check</span>
+    <span class="status-val"><div class="dot spin" id="healthDot"></div><span id="healthTxt">Checking…</span></span>
+  </div>
+  <div class="status-row">
+    <span class="status-label">Authentication</span>
+    <span class="status-val"><div class="dot" id="authDot"></div><span id="authTxt">Waiting…</span></span>
+  </div>
+  <div class="status-row">
+    <span class="status-label">Companies</span>
+    <span class="status-val"><div class="dot" id="companiesDot"></div><span id="companiesTxt">Waiting…</span></span>
+  </div>
+</div>
+
+<!-- LOG -->
+<div class="log" id="log"></div>
+
+<!-- RETRY -->
+<button class="btn" id="retryBtn" onclick="runAll()" style="display:none">↺ Retry Connection</button>
+
+<!-- COMPANIES -->
+<div id="companiesSection" style="display:none">
+  <div class="section-title" id="companiesTitle">Companies</div>
+  <div class="company-list" id="companyList"></div>
+  <div class="selected-banner" id="selectedBanner"></div>
+</div>
+
+<script>
+  // ── CHANGE THIS to your new Railway URL once deployed ──
+  const GATEWAY = 'https://YOUR-NEW-RAILWAY-URL.up.railway.app';
+
+  function log(msg, type = '') {
+    const el = document.getElementById('log');
+    const ts = new Date().toLocaleTimeString();
+    el.innerHTML += `<div class="log-line ${type}">[${ts}] ${msg}</div>`;
+    el.scrollTop = el.scrollHeight;
+  }
+
+  function setStatus(id, dotClass, text) {
+    document.getElementById(id + 'Dot').className = 'dot ' + dotClass;
+    document.getElementById(id + 'Txt').textContent = text;
+  }
+
+  async function runAll() {
+    document.getElementById('retryBtn').style.display = 'none';
+    document.getElementById('companiesSection').style.display = 'none';
+    document.getElementById('gatewayUrl').textContent = GATEWAY;
+
+    // Reset statuses
+    setStatus('health',    'spin', 'Checking…');
+    setStatus('auth',      '',     'Waiting…');
+    setStatus('companies', '',     'Waiting…');
+
+    // ── STEP 1: Health check ──
+    log('Checking gateway health…', 'info');
+    try {
+      const r = await fetch(`${GATEWAY}/api/health`);
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const d = await r.json();
+      setStatus('health', 'ok', 'Online ✓');
+      log('Gateway is online: ' + JSON.stringify(d), 'ok');
+    } catch (e) {
+      setStatus('health', 'err', 'Failed — ' + e.message);
+      log('Health check failed: ' + e.message, 'err');
+      log('Is your Railway service deployed and running?', 'err');
+      document.getElementById('retryBtn').style.display = 'inline-flex';
+      return;
+    }
+
+    // ── STEP 2: Get token ──
+    log('Requesting auth token…', 'info');
+    setStatus('auth', 'spin', 'Authenticating…');
+    let token;
+    try {
+      const r = await fetch(`${GATEWAY}/api/token`, { method: 'POST' });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const d = await r.json();
+      if (!d.access_token) throw new Error('No access_token in response');
+      token = d.access_token;
+      setStatus('auth', 'ok', 'Authenticated ✓');
+      log('Token received (length: ' + token.length + ')', 'ok');
+    } catch (e) {
+      setStatus('auth', 'err', 'Failed — ' + e.message);
+      log('Auth failed: ' + e.message, 'err');
+      document.getElementById('retryBtn').style.display = 'inline-flex';
+      return;
+    }
+
+    // ── STEP 3: Load companies ──
+    log('Fetching companies from SellerCloud…', 'info');
+    setStatus('companies', 'spin', 'Loading…');
+    try {
+      const r = await fetch(`${GATEWAY}/api/companies`);
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const d = await r.json();
+      if (d.error) throw new Error(d.error);
+
+      const companies = d.Items || d.items || [];
+      if (!companies.length) throw new Error('Response came back empty — check SC permissions');
+
+      setStatus('companies', 'ok', companies.length + ' companies loaded ✓');
+      log(`Loaded ${companies.length} companies (TotalResults: ${d.TotalResults})`, 'ok');
+
+      renderCompanies(companies);
+    } catch (e) {
+      setStatus('companies', 'err', 'Failed — ' + e.message);
+      log('Companies fetch failed: ' + e.message, 'err');
+      document.getElementById('retryBtn').style.display = 'inline-flex';
+    }
+  }
+
+  function renderCompanies(companies) {
+    const section = document.getElementById('companiesSection');
+    const list    = document.getElementById('companyList');
+    const title   = document.getElementById('companiesTitle');
+
+    title.textContent = `Companies (${companies.length})`;
+    list.innerHTML = companies.map(c => {
+      const id   = c.ID || c.Id || '?';
+      const name = c.CompanyName || c.Name || 'Company ' + id;
+      return `<div class="company-item" data-id="${id}" data-name="${name.replace(/"/g,'&quot;')}" onclick="selectCompany(this, ${id}, '${name.replace(/'/g,"\\'")}')">
+        <div class="c-name">${name}</div>
+        <div class="c-id">ID: ${id}</div>
+      </div>`;
+    }).join('');
+
+    section.style.display = 'block';
+    log('Companies rendered. Click one to select.', 'info');
+  }
+
+  function selectCompany(el, id, name) {
+    document.querySelectorAll('.company-item').forEach(e => e.classList.remove('selected'));
+    el.classList.add('selected');
+
+    const banner = document.getElementById('selectedBanner');
+    banner.style.display = 'block';
+    banner.innerHTML = `✅ Selected: <strong>${name}</strong> &nbsp;·&nbsp; ID: <strong style="color:var(--muted)">${id}</strong><br><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-top:6px;display:block">This confirms the company picker works. Next stage: date range + orders.</span>`;
+
+    log(`Company selected: "${name}" (ID: ${id})`, 'ok');
+  }
+
+  // Auto-run on load
+  runAll();
+</script>
+</body>
+</html>
