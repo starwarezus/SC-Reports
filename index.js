@@ -1,10 +1,11 @@
 const express = require('express');
 const fetch   = require('node-fetch');
+const path    = require('path');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
 
-// ── CORS ──────────────────────────────────────────────────────
+// CORS - must be first
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -16,14 +17,19 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 
-// ── SELLERCLOUD CONFIG ────────────────────────────────────────
+// Serve HTML files from the /public folder
+// e.g. /public/index.html   -> https://your-url.railway.app/
+// e.g. /public/reports.html -> https://your-url.railway.app/reports.html
+app.use(express.static(path.join(__dirname, 'public')));
+
+// SellerCloud config
 const SC_BASE = 'https://blny.api.sellercloud.com/rest/api';
 const SC_USER = process.env.SC_USERNAME || 'henry@goldlabelny.com';
 const SC_PASS = process.env.SC_PASSWORD || 'Corishabt1987!!';
 
-// ── TOKEN CACHE ───────────────────────────────────────────────
-let cachedToken  = null;
-let tokenExpiry  = null;
+// Token cache
+let cachedToken = null;
+let tokenExpiry = null;
 
 async function getToken() {
   if (cachedToken && tokenExpiry && (tokenExpiry - Date.now()) > 5 * 60 * 1000) {
@@ -38,25 +44,24 @@ async function getToken() {
 
   if (!response.ok) {
     const err = await response.text();
-    throw new Error(`Token failed: ${response.status} — ${err}`);
+    throw new Error(`Token failed: ${response.status} - ${err}`);
   }
 
   const data = await response.json();
   if (!data.access_token) throw new Error('No access_token in response');
 
   cachedToken = data.access_token;
-  tokenExpiry = Date.now() + 55 * 60 * 1000; // 55 min
-  console.log('New token cached');
+  tokenExpiry = Date.now() + 55 * 60 * 1000;
+  console.log('New SC token cached');
   return cachedToken;
 }
 
-// ── HEALTH CHECK ──────────────────────────────────────────────
+// GET /api/health
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', service: 'SC Reports Gateway', time: new Date().toISOString() });
 });
 
-// ── TOKEN ENDPOINT ────────────────────────────────────────────
-// Returns a fresh (or cached) SC token to the frontend
+// POST /api/token
 app.post('/api/token', async (req, res) => {
   try {
     const token = await getToken();
@@ -67,9 +72,7 @@ app.post('/api/token', async (req, res) => {
   }
 });
 
-// ── COMPANIES ─────────────────────────────────────────────────
 // GET /api/companies
-// Query params: pageSize (default 200), pageNumber (default 1), keyword
 app.get('/api/companies', async (req, res) => {
   try {
     const token      = await getToken();
@@ -86,7 +89,7 @@ app.get('/api/companies', async (req, res) => {
 
     if (!response.ok) {
       const err = await response.text();
-      throw new Error(`SC Companies API: ${response.status} — ${err}`);
+      throw new Error(`SC Companies API: ${response.status} - ${err}`);
     }
 
     const data = await response.json();
@@ -98,7 +101,6 @@ app.get('/api/companies', async (req, res) => {
   }
 });
 
-// ── START ─────────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log(`SC Reports Gateway running on port ${PORT}`);
 });
