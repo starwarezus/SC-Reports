@@ -1,0 +1,13 @@
+{
+  "name": "sc-reports-gateway",
+  "version": "1.0.0",
+  "description": "SellerCloud Reports Hub — Railway API Gateway",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "node-fetch": "^2.7.0"
+  }
+}
