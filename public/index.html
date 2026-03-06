@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SC Reports</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Cabinet+Grotesk:wght@500;700;800&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root{--bg:#07080f;--s1:#0e0f1a;--s2:#141525;--s3:#1c1e30;--border:#252740;--accent:#5b6af0;--green:#3ecf8e;--pink:#e05c8a;--amber:#f0a444;--text:#dde1f5;--muted:#5a5e80}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -93,8 +92,15 @@ tbody tr:hover td{background:var(--s2)}
 @keyframes spin{to{transform:rotate(360deg)}}
 .err-msg{color:var(--pink);font-size:13px;font-family:'DM Mono',monospace;margin-top:12px;padding:12px 16px;background:rgba(224,92,138,.08);border:1px solid rgba(224,92,138,.2);border-radius:8px}
 
-.waterfall-wrap{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:24px;margin-top:4px}
-.waterfall-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:20px}
+.pnl-rows{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:24px;margin-top:4px}
+.pnl-rows-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
+.pnl-row{display:grid;grid-template-columns:24px 1fr auto;align-items:center;padding:12px 0;border-bottom:1px solid rgba(37,39,64,.5)}
+.pnl-row:last-child{border-bottom:none}
+.pnl-row-total{border-top:2px solid var(--border);border-bottom:none;margin-top:4px;padding-top:16px}
+.pnl-row-prefix{font-family:'DM Mono',monospace;font-size:16px;color:var(--muted)}
+.pnl-row-label{font-size:14px;color:var(--text)}
+.pnl-row-value{font-family:'DM Mono',monospace;font-size:14px;text-align:right}
+.pnl-bold{font-weight:800;font-size:16px!important}
 </style>
 </head>
 <body>
@@ -382,49 +388,24 @@ function fm(n){return'$'+parseFloat(n||0).toLocaleString('en-US',{minimumFractio
 function setProgress(pct,label){document.getElementById('progressFill').style.width=pct+'%';document.getElementById('progressLabel').textContent=label}
 function setConn(state,txt){document.getElementById('connDot').className='dot '+state;document.getElementById('connTxt').textContent=txt}
 
-function buildWaterfall(sales,fees,returns,cogs,profit){
-  var id='wfChart_'+Date.now();
-  setTimeout(function(){
-    var canvas=document.getElementById(id);
-    if(!canvas)return;
-    var labels=['Sales','Fees & Comm.','Returns','COGS','Profit'];
-    var colors=[
-      'rgba(91,106,240,0.85)',
-      'rgba(224,92,138,0.85)',
-      'rgba(224,92,138,0.85)',
-      'rgba(240,164,68,0.85)',
-      profit>=0?'rgba(62,207,142,0.85)':'rgba(224,92,138,0.85)'
-    ];
-    var bases=[0, sales-fees, sales-fees-returns, sales-fees-returns-cogs, 0];
-    var heights=[sales, fees, returns, cogs, Math.abs(profit)];
-    bases[4]=profit>=0?sales-fees-returns-cogs:sales-fees-returns-cogs+profit;
-    if(bases[4]<0)bases[4]=0;
-    new Chart(canvas,{
-      type:'bar',
-      data:{
-        labels:labels,
-        datasets:[
-          {label:'base',data:bases,backgroundColor:'transparent',borderColor:'transparent',stack:'w'},
-          {label:'value',data:heights,backgroundColor:colors,borderRadius:6,borderSkipped:false,stack:'w'}
-        ]
-      },
-      options:{
-        responsive:true,maintainAspectRatio:false,
-        plugins:{
-          legend:{display:false},
-          tooltip:{
-            filter:function(item){return item.datasetIndex===1},
-            callbacks:{label:function(ctx){var vals=[sales,fees,returns,cogs,profit];return' '+fm(vals[ctx.dataIndex]);}}
-          }
-        },
-        scales:{
-          x:{stacked:true,grid:{color:'rgba(37,39,64,0.5)'},ticks:{color:'#5a5e80',font:{family:'DM Mono, monospace',size:11}}},
-          y:{stacked:true,grid:{color:'rgba(37,39,64,0.5)'},ticks:{color:'#5a5e80',font:{family:'DM Mono, monospace',size:11},callback:function(v){return'$'+v.toLocaleString()}}}
-        }
-      }
-    });
-  },150);
-  return '<div class="waterfall-wrap"><div class="waterfall-title">P&L Breakdown</div><div style="position:relative;height:320px"><canvas id="'+id+'"></canvas></div></div>';
+function buildPnLRows(sales,fees,returns,cogs,profit){
+  var rows=[
+    {label:'Sales',value:sales,prefix:'',color:'var(--text)',border:false,bold:false},
+    {label:'Fees & Commissions',value:-fees,prefix:'−',color:'var(--pink)',border:false,bold:false},
+    {label:'Returns',value:-returns,prefix:'−',color:'var(--pink)',border:false,bold:false},
+    {label:'Cost of Goods',value:-cogs,prefix:'−',color:'var(--amber)',border:false,bold:false},
+    {label:'Net Profit / Loss',value:profit,prefix:'=',color:profit>=0?'var(--green)':'var(--pink)',border:true,bold:true}
+  ];
+  var html='<div class="pnl-rows"><div class="pnl-rows-title">P&L Breakdown</div>';
+  rows.forEach(function(r){
+    html+='<div class="pnl-row'+(r.border?' pnl-row-total':'')+'">';
+    html+='<div class="pnl-row-prefix">'+r.prefix+'</div>';
+    html+='<div class="pnl-row-label'+(r.bold?' pnl-bold':'')+'">'+r.label+'</div>';
+    html+='<div class="pnl-row-value'+(r.bold?' pnl-bold':'')+'" style="color:'+r.color+'">'+fm(Math.abs(r.value))+'</div>';
+    html+='</div>';
+  });
+  html+='</div>';
+  return html;
 }
 
 </script>
