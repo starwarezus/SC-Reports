@@ -301,7 +301,7 @@ function buildSummary(){
     '<div class="kpi c3"><div class="kpi-label">Net Profit / Loss</div><div class="kpi-value" style="color:'+(profit>=0?'var(--green)':'var(--pink)')+'">'+fm(profit)+'</div><div class="kpi-sub">from P&L data</div></div>'+
     '<div class="kpi-section-label">Orders by Status</div>'+
     Object.entries(sc).map(([s,n])=>'<div class="kpi c1" style="padding:14px 18px"><div class="kpi-label">'+s+'</div><div class="kpi-value" style="font-size:22px">'+n.toLocaleString()+'</div><div class="kpi-sub">'+(allOrders.length?((n/allOrders.length)*100).toFixed(1):0)+'%</div></div>').join('')+
-    '</div>'+buildWaterfall(grossRevenue,feesTotal,returnsAmount,itemCost,profit);
+    '</div>'+buildPnLRows(grossRevenue,feesTotal,returnsAmount,itemCost,profit);
 }
 function buildOrderTable(){
   return '<div style="margin-top:'+(currentView==='both'?'32px':'0')+'">'+
