@@ -19,7 +19,7 @@ app.use(express.json());
 
 // Serve HTML from /public
 app.use(express.static(path.join(__dirname, 'public')));
-
+console.log('Serving static from:', path.join(__dirname, 'public'));
 // SellerCloud config
 const SC_BASE     = 'https://blny.api.sellercloud.com/rest/api';
 const SC_BASE_PNL = 'https://blny.api.sellercloud.com/api';   // P&L uses different base path
