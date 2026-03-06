@@ -6,229 +6,377 @@
 <title>SC Reports</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Cabinet+Grotesk:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg: #07080f;
-  --s1: #0e0f1a;
-  --s2: #141525;
-  --border: #252740;
-  --accent: #5b6af0;
-  --green: #3ecf8e;
-  --pink: #e05c8a;
-  --amber: #f0a444;
-  --text: #dde1f5;
-  --muted: #5a5e80;
-}
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { background: var(--bg); color: var(--text); font-family: 'Cabinet Grotesk', sans-serif; min-height: 100vh; }
-
-/* STATUS BAR */
-.status-bar {
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 28px; border-bottom: 1px solid var(--border);
-  font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted);
-  background: var(--s1);
-}
-.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
-.dot.ok   { background: var(--green); box-shadow: 0 0 7px var(--green); animation: pulse 2.5s infinite; }
-.dot.err  { background: var(--pink);  box-shadow: 0 0 7px var(--pink); }
-.dot.spin { background: var(--amber); animation: pulse .6s infinite; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-
-/* MAIN */
-main { max-width: 1100px; margin: 0 auto; padding: 36px 28px; }
-
-h1 { font-size: 24px; font-weight: 800; letter-spacing: -.5px; margin-bottom: 4px; }
-.page-sub { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); margin-bottom: 32px; }
-
-.section-label {
-  font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px;
-  text-transform: uppercase; color: var(--muted); margin-bottom: 14px;
-}
-
-/* COMPANY GRID */
-.company-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 10px; margin-bottom: 36px;
-}
-.cc {
-  background: var(--s1); border: 1.5px solid var(--border); border-radius: 10px;
-  padding: 16px 18px; cursor: pointer; transition: all .15s;
-  font-size: 13px; font-weight: 700; line-height: 1.3;
-}
-.cc:hover { border-color: var(--accent); transform: translateY(-2px); background: var(--s2); }
-.cc.sel   { border-color: var(--accent); background: rgba(91,106,240,.12); color: #fff; }
-
-/* DATE SECTION */
-.date-section { display: none; animation: fadeIn .25s ease; }
-.date-section.visible { display: block; }
-@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-
-.range-buttons { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
-.range-btn {
-  padding: 9px 20px; border-radius: 8px; border: 1.5px solid var(--border);
-  background: var(--s1); color: var(--muted); cursor: pointer;
-  font-family: 'Cabinet Grotesk', sans-serif; font-weight: 700; font-size: 13px;
-  transition: all .15s;
-}
-.range-btn:hover  { border-color: var(--accent); color: var(--text); }
-.range-btn.active { border-color: var(--accent); background: rgba(91,106,240,.12); color: var(--text); }
-
-.custom-dates {
-  display: none; align-items: center; gap: 12px; flex-wrap: wrap;
-  margin-bottom: 16px; animation: fadeIn .2s ease;
-}
-.custom-dates.visible { display: flex; }
-.custom-dates label { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
-input[type=date] {
-  background: var(--s2); border: 1px solid var(--border); color: var(--text);
-  padding: 9px 13px; border-radius: 8px; font-family: 'DM Mono', monospace;
-  font-size: 13px; outline: none; transition: border-color .2s;
-}
-input[type=date]:focus { border-color: var(--accent); }
-
-/* GENERATE BUTTON */
-.btn-generate {
-  margin-top: 8px; padding: 12px 32px; border-radius: 10px; border: none;
-  background: var(--accent); color: #fff; cursor: pointer;
-  font-family: 'Cabinet Grotesk', sans-serif; font-weight: 800; font-size: 15px;
-  transition: all .18s; opacity: .35; pointer-events: none;
-}
-.btn-generate.ready { opacity: 1; pointer-events: all; }
-.btn-generate.ready:hover { background: #6b7af5; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(91,106,240,.35); }
-
-.spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
+:root{--bg:#07080f;--s1:#0e0f1a;--s2:#141525;--s3:#1c1e30;--border:#252740;--accent:#5b6af0;--green:#3ecf8e;--pink:#e05c8a;--amber:#f0a444;--text:#dde1f5;--muted:#5a5e80}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Cabinet Grotesk',sans-serif;min-height:100vh}
+.status-bar{display:flex;align-items:center;gap:10px;padding:10px 28px;border-bottom:1px solid var(--border);font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);background:var(--s1)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex-shrink:0}
+.dot.ok{background:var(--green);box-shadow:0 0 7px var(--green);animation:pulse 2.5s infinite}
+.dot.err{background:var(--pink);box-shadow:0 0 7px var(--pink)}
+.dot.spin{background:var(--amber);animation:pulse .6s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+main{max-width:1100px;margin:0 auto;padding:36px 28px}
+h1{font-size:24px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px}
+.page-sub{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);margin-bottom:32px}
+.section-label{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.company-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:36px}
+.cc{background:var(--s1);border:1.5px solid var(--border);border-radius:10px;padding:16px 18px;cursor:pointer;transition:all .15s;font-size:13px;font-weight:700;line-height:1.3}
+.cc:hover{border-color:var(--accent);transform:translateY(-2px);background:var(--s2)}
+.cc.sel{border-color:var(--accent);background:rgba(91,106,240,.12);color:#fff}
+.date-section{display:none}
+.date-section.visible{display:block;animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.range-buttons{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.range-btn{padding:9px 20px;border-radius:8px;border:1.5px solid var(--border);background:var(--s1);color:var(--muted);cursor:pointer;font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:13px;transition:all .15s}
+.range-btn:hover{border-color:var(--accent);color:var(--text)}
+.range-btn.active{border-color:var(--accent);background:rgba(91,106,240,.12);color:var(--text)}
+.custom-dates{display:none;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.custom-dates.visible{display:flex;animation:fadeIn .2s ease}
+.custom-dates label{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)}
+input[type=date]{background:var(--s2);border:1px solid var(--border);color:var(--text);padding:9px 13px;border-radius:8px;font-family:'DM Mono',monospace;font-size:13px;outline:none;transition:border-color .2s}
+input[type=date]:focus{border-color:var(--accent)}
+.btn{padding:11px 28px;border-radius:10px;border:none;cursor:pointer;font-family:'Cabinet Grotesk',sans-serif;font-weight:800;font-size:14px;transition:all .18s}
+.btn-primary{background:var(--accent);color:#fff;opacity:.35;pointer-events:none}
+.btn-primary.ready{opacity:1;pointer-events:all}
+.btn-primary.ready:hover{background:#6b7af5;transform:translateY(-1px);box-shadow:0 4px 20px rgba(91,106,240,.35)}
+.progress-wrap{display:none;margin-top:24px}
+.progress-track{background:var(--s2);border-radius:6px;height:6px;overflow:hidden;margin-bottom:8px}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--green));border-radius:6px;width:0%;transition:width .3s ease}
+.progress-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)}
+.report-section{display:none;margin-top:40px}
+.report-section.visible{display:block;animation:fadeIn .3s ease}
+.report-header{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:24px}
+.report-title{font-size:20px;font-weight:800;letter-spacing:-.4px}
+.report-meta{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-top:4px}
+.view-toggle{display:flex;gap:4px;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:4px}
+.vt-btn{padding:7px 16px;border-radius:7px;border:none;cursor:pointer;font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:13px;background:transparent;color:var(--muted);transition:all .15s}
+.vt-btn.active{background:var(--accent);color:#fff}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:28px}
+.kpi{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:20px;position:relative;overflow:hidden}
+.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.kpi.c1::after{background:var(--accent)}
+.kpi.c2::after{background:var(--pink)}
+.kpi.c3::after{background:var(--green)}
+.kpi.c4::after{background:var(--amber)}
+.kpi-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.kpi-value{font-size:26px;font-weight:900;letter-spacing:-.5px;line-height:1}
+.kpi-sub{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-top:6px}
+.kpi-section-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin:20px 0 10px;grid-column:1/-1;border-top:1px solid var(--border);padding-top:16px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
+thead th:hover{color:var(--text)}
+thead th.sorted{color:var(--accent)}
+tbody td{padding:11px 12px;border-bottom:1px solid rgba(37,39,64,.5)}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--s2)}
+.mono{font-family:'DM Mono',monospace;font-size:12px}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:5px;font-size:11px;font-family:'DM Mono',monospace;white-space:nowrap}
+.b-green{background:rgba(62,207,142,.12);color:var(--green)}
+.b-blue{background:rgba(91,106,240,.15);color:var(--accent)}
+.b-amber{background:rgba(240,164,68,.12);color:var(--amber)}
+.b-pink{background:rgba(224,92,138,.12);color:var(--pink)}
+.b-gray{background:var(--s3);color:var(--muted)}
+.table-toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:14px}
+.tbl-search{background:var(--s2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-family:'DM Mono',monospace;font-size:12px;outline:none;width:220px;transition:border-color .2s}
+.tbl-search:focus{border-color:var(--accent)}
+.tbl-search::placeholder{color:var(--muted)}
+.tbl-meta{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)}
+.btn-export{padding:7px 16px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:12px;transition:all .15s}
+.btn-export:hover{color:var(--text);border-color:var(--muted)}
+.pagination{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted)}
+.pg-btn{padding:6px 14px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:12px;transition:all .15s}
+.pg-btn:hover:not(:disabled){color:var(--text);border-color:var(--muted)}
+.pg-btn:disabled{opacity:.3;cursor:not-allowed}
+.spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.err-msg{color:var(--pink);font-size:13px;font-family:'DM Mono',monospace;margin-top:12px;padding:12px 16px;background:rgba(224,92,138,.08);border:1px solid rgba(224,92,138,.2);border-radius:8px}
 </style>
 </head>
 <body>
-
 <div class="status-bar">
   <div class="dot spin" id="connDot"></div>
-  <span id="connTxt">Connecting…</span>
+  <span id="connTxt">Connecting...</span>
 </div>
-
 <main>
   <h1>Sales Reports</h1>
   <p class="page-sub">Select a company to get started</p>
-
   <div class="section-label">Companies</div>
   <div class="company-grid" id="companyGrid">
     <div style="display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px;grid-column:1/-1">
-      <div class="spinner"></div> Loading companies…
+      <div class="spinner"></div> Loading companies...
     </div>
   </div>
-
   <div class="date-section" id="dateSection">
     <div class="section-label">Date Range</div>
     <div class="range-buttons">
-      <button class="range-btn" onclick="setRange(7, this)">Last 7 days</button>
-      <button class="range-btn active" onclick="setRange(30, this)">Last 30 days</button>
-      <button class="range-btn" onclick="setRange(90, this)">Last 90 days</button>
-      <button class="range-btn" onclick="setRange('custom', this)">Custom…</button>
+      <button class="range-btn" onclick="setRange(7,this)">Last 7 days</button>
+      <button class="range-btn active" onclick="setRange(30,this)">Last 30 days</button>
+      <button class="range-btn" onclick="setRange(90,this)">Last 90 days</button>
+      <button class="range-btn" onclick="setRange('custom',this)">Custom...</button>
     </div>
     <div class="custom-dates" id="customDates">
-      <label>From</label>
-      <input type="date" id="dateFrom" onchange="checkReady()">
-      <label>To</label>
-      <input type="date" id="dateTo" onchange="checkReady()">
+      <label>From</label><input type="date" id="dateFrom" onchange="checkReady()">
+      <label>To</label><input type="date" id="dateTo" onchange="checkReady()">
     </div>
-    <button class="btn-generate" id="generateBtn" onclick="generate()">Generate Report →</button>
+    <button class="btn btn-primary" id="generateBtn" onclick="generate()">Generate Report</button>
+    <div id="errorMsg"></div>
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-label" id="progressLabel">Starting...</div>
+    </div>
+  </div>
+  <div class="report-section" id="reportSection">
+    <div class="report-header">
+      <div>
+        <div class="report-title" id="reportTitle"></div>
+        <div class="report-meta" id="reportMeta"></div>
+      </div>
+      <div class="view-toggle">
+        <button class="vt-btn active" onclick="setView('summary')">Summary</button>
+        <button class="vt-btn" onclick="setView('orders')">Orders</button>
+        <button class="vt-btn" onclick="setView('both')">Both</button>
+      </div>
+    </div>
+    <div id="reportBody"></div>
   </div>
 </main>
-
 <script>
-const GATEWAY = '';
-
-let selectedCompany = null;
-let dateFrom = null;
-let dateTo   = null;
-
-// default to last 30 days on load
-(function() {
-  const now = new Date(), from = new Date();
-  from.setDate(now.getDate() - 30);
-  dateFrom = fmt(from);
-  dateTo   = fmt(now);
-})();
-
-window.onload = async () => { await init(); };
-
-async function init() {
-  try {
-    const r = await fetch(`${GATEWAY}/api/companies`);
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const d = await r.json();
-    if (d.error) throw new Error(d.error);
-    const companies = d.Items || d.items || [];
-    if (!companies.length) throw new Error('No companies returned');
-    setConn('ok', 'Connected · ' + companies.length + ' companies');
-    renderCompanies(companies);
-  } catch(e) {
-    setConn('err', 'Connection failed — ' + e.message);
-    document.getElementById('companyGrid').innerHTML =
-      `<p style="color:var(--pink);font-size:13px;grid-column:1/-1">Failed to load: ${e.message}</p>`;
+const GATEWAY='';
+let selectedCompany=null,dateFrom=null,dateTo=null;
+let allOrders=[],pnlMap={},filteredOrders=[];
+let sortKey='TimeOfOrder',sortAsc=false,curPage=1;
+const PAGE_SIZE=50;
+let currentView='summary';
+const OS={0:'Unknown',1:'Cart',2:'Completed',3:'In Process',4:'Problem',5:'On Hold',6:'Quote',7:'Void',8:'Cancelled'};
+(function(){const n=new Date(),f=new Date();f.setDate(n.getDate()-30);dateFrom=fd(f);dateTo=fd(n)})();
+window.onload=async()=>{await init()};
+async function init(){
+  try{
+    const r=await fetch(GATEWAY+'/api/companies');
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const d=await r.json();
+    if(d.error)throw new Error(d.error);
+    const cos=d.Items||d.items||[];
+    if(!cos.length)throw new Error('No companies returned');
+    setConn('ok','Connected - '+cos.length+' companies');
+    renderCompanies(cos);
+  }catch(e){
+    setConn('err','Connection failed - '+e.message);
+    document.getElementById('companyGrid').innerHTML='<p style="color:var(--pink);font-size:13px;grid-column:1/-1">Failed: '+e.message+'</p>';
   }
 }
-
-function renderCompanies(list) {
-  document.getElementById('companyGrid').innerHTML = list.map(c => {
-    const id   = c.ID || c.Id || '?';
-    const name = c.CompanyName || c.Name || 'Company ' + id;
-    return `<div class="cc" data-id="${id}" onclick="selectCompany(this, ${id}, '${name.replace(/'/g,"\\'")}')">
-      ${name}
-    </div>`;
+function renderCompanies(list){
+  document.getElementById('companyGrid').innerHTML=list.map(c=>{
+    const id=c.ID||c.Id||'?';
+    const name=c.CompanyName||c.Name||'Company '+id;
+    return '<div class="cc" data-id="'+id+'" onclick="selectCompany(this,'+id+',\''+name.replace(/'/g,"\\'")+'\')" >'+name+'</div>';
   }).join('');
 }
-
-function selectCompany(el, id, name) {
-  document.querySelectorAll('.cc').forEach(c => c.classList.remove('sel'));
+function selectCompany(el,id,name){
+  document.querySelectorAll('.cc').forEach(c=>c.classList.remove('sel'));
   el.classList.add('sel');
-  selectedCompany = { id, name };
+  selectedCompany={id,name};
   document.getElementById('dateSection').classList.add('visible');
+  document.getElementById('reportSection').classList.remove('visible');
+  document.getElementById('errorMsg').innerHTML='';
   checkReady();
 }
-
-function setRange(days, btn) {
-  if (btn) {
-    document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-  }
-  const customDates = document.getElementById('customDates');
-  if (days === 'custom') {
-    customDates.classList.add('visible');
-    dateFrom = document.getElementById('dateFrom').value || null;
-    dateTo   = document.getElementById('dateTo').value   || null;
-  } else {
-    customDates.classList.remove('visible');
-    const now = new Date(), from = new Date();
-    from.setDate(now.getDate() - days);
-    dateFrom = fmt(from);
-    dateTo   = fmt(now);
-  }
+function setRange(days,btn){
+  if(btn){document.querySelectorAll('.range-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active')}
+  const cd=document.getElementById('customDates');
+  if(days==='custom'){cd.classList.add('visible');dateFrom=document.getElementById('dateFrom').value||null;dateTo=document.getElementById('dateTo').value||null}
+  else{cd.classList.remove('visible');const n=new Date(),f=new Date();f.setDate(n.getDate()-days);dateFrom=fd(f);dateTo=fd(n)}
   checkReady();
 }
-
-function fmt(d) { return d.toISOString().split('T')[0]; }
-
-function checkReady() {
-  if (document.getElementById('customDates').classList.contains('visible')) {
-    dateFrom = document.getElementById('dateFrom').value || null;
-    dateTo   = document.getElementById('dateTo').value   || null;
+function checkReady(){
+  if(document.getElementById('customDates').classList.contains('visible')){dateFrom=document.getElementById('dateFrom').value||null;dateTo=document.getElementById('dateTo').value||null}
+  document.getElementById('generateBtn').classList.toggle('ready',!!(selectedCompany&&dateFrom&&dateTo));
+}
+async function generate(){
+  if(!selectedCompany||!dateFrom||!dateTo)return;
+  document.getElementById('errorMsg').innerHTML='';
+  document.getElementById('reportSection').classList.remove('visible');
+  document.getElementById('generateBtn').classList.remove('ready');
+  const pw=document.getElementById('progressWrap');
+  pw.style.display='block';
+  setProgress(0,'Fetching orders...');
+  try{
+    // Step 1: fetch all orders paginated
+    allOrders=[];
+    let page=1,total=null;
+    while(true){
+      const r=await fetch(GATEWAY+'/api/orders?companyId='+selectedCompany.id+'&from='+dateFrom+'&to='+dateTo+'&page='+page+'&pageSize=50');
+      if(!r.ok)throw new Error('Orders HTTP '+r.status);
+      const d=await r.json();
+      if(d.error)throw new Error(d.error);
+      const items=d.Items||d.items||[];
+      allOrders=allOrders.concat(items);
+      if(total===null)total=d.TotalResults||d.totalResults||items.length;
+      setProgress(Math.min(50,Math.round((allOrders.length/Math.max(total,1))*50)),'Fetching orders... '+allOrders.length+' of '+total);
+      if(items.length<50||allOrders.length>=total)break;
+      page++;
+    }
+    if(!allOrders.length){
+      pw.style.display='none';
+      document.getElementById('errorMsg').innerHTML='<div class="err-msg">No orders found for this date range.</div>';
+      document.getElementById('generateBtn').classList.add('ready');
+      return;
+    }
+    // Step 2: P&L in batches of 100
+    pnlMap={};
+    const ids=allOrders.map(o=>o.ID);
+    const bs=100;
+    for(let i=0;i<ids.length;i+=bs){
+      const batch=ids.slice(i,i+bs);
+      setProgress(50+Math.round((i/ids.length)*45),'Fetching P&L... '+Math.min(i+bs,ids.length)+' of '+ids.length);
+      const r=await fetch(GATEWAY+'/api/orders/pnl',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderIds:batch})});
+      if(!r.ok)throw new Error('P&L HTTP '+r.status);
+      const data=await r.json();
+      if(data.error)throw new Error(data.error);
+      (Array.isArray(data)?data:[]).forEach(p=>{pnlMap[p.OrderID]=p});
+    }
+    setProgress(100,'Done');
+    setTimeout(()=>{pw.style.display='none'},500);
+    filteredOrders=[...allOrders];
+    currentView='summary';
+    renderReport();
+    document.getElementById('reportSection').classList.add('visible');
+    document.getElementById('reportSection').scrollIntoView({behavior:'smooth',block:'start'});
+  }catch(e){
+    pw.style.display='none';
+    document.getElementById('errorMsg').innerHTML='<div class="err-msg">Error: '+e.message+'</div>';
+    console.error(e);
+  }finally{
+    document.getElementById('generateBtn').classList.add('ready');
   }
-  const ready = !!(selectedCompany && dateFrom && dateTo);
-  document.getElementById('generateBtn').classList.toggle('ready', ready);
 }
-
-function generate() {
-  if (!selectedCompany || !dateFrom || !dateTo) return;
-  // Stage 3: pull orders and render report
-  alert(`Stage 3 coming next!\n\nCompany: ${selectedCompany.name} (ID: ${selectedCompany.id})\nFrom: ${dateFrom}\nTo: ${dateTo}`);
+function renderReport(){
+  document.getElementById('reportTitle').textContent=selectedCompany.name;
+  document.getElementById('reportMeta').textContent=fdisp(dateFrom)+' to '+fdisp(dateTo)+' - '+allOrders.length.toLocaleString()+' orders';
+  document.querySelectorAll('.vt-btn').forEach((b,i)=>b.classList.toggle('active',(currentView==='summary'&&i===0)||(currentView==='orders'&&i===1)||(currentView==='both'&&i===2)));
+  let html='';
+  if(currentView==='summary'||currentView==='both')html+=buildSummary();
+  if(currentView==='orders'||currentView==='both')html+=buildOrderTable();
+  document.getElementById('reportBody').innerHTML=html;
+  if(currentView==='orders'||currentView==='both')renderTableRows();
 }
-
-function setConn(state, txt) {
-  document.getElementById('connDot').className = 'dot ' + state;
-  document.getElementById('connTxt').textContent = txt;
+function setView(v){currentView=v;renderReport()}
+function buildSummary(){
+  let unitsSold=0,unitsReturned=0,grossRevenue=0,returnsAmount=0,taxTotal=0,shippingTotal=0,itemCost=0,feesTotal=0,profit=0;
+  allOrders.forEach(o=>{
+    (o.Items||[]).forEach(i=>{unitsSold+=(i.Qty||0);unitsReturned+=(i.QtyReturned||0);returnsAmount+=(i.QtyReturned||0)*(i.AdjustedSitePrice||i.SitePrice||0)});
+    grossRevenue+=parseFloat(o.GrandTotal||0);
+    taxTotal+=parseFloat(o.TaxTotal||0);
+    shippingTotal+=parseFloat(o.ShippingTotal||0);
+  });
+  Object.values(pnlMap).forEach(p=>{
+    itemCost+=parseFloat(p.ItemCost||p.ItemCostUsd||0);
+    feesTotal+=parseFloat(p.Comission||0)+parseFloat(p.TransactionFee||0)+parseFloat(p.PostingFee||0);
+    profit+=parseFloat(p.ProfitLoss||p.ProfitLossUsd||0);
+  });
+  const sc={};allOrders.forEach(o=>{const s=OS[o.StatusCode]||'Unknown';sc[s]=(sc[s]||0)+1});
+  return '<div class="kpi-grid">'+
+    '<div class="kpi-section-label">Sales</div>'+
+    '<div class="kpi c1"><div class="kpi-label">Units Sold</div><div class="kpi-value">'+unitsSold.toLocaleString()+'</div><div class="kpi-sub">'+allOrders.length.toLocaleString()+' orders</div></div>'+
+    '<div class="kpi c1"><div class="kpi-label">Gross Revenue</div><div class="kpi-value">'+fm(grossRevenue)+'</div><div class="kpi-sub">before deductions</div></div>'+
+    '<div class="kpi c1"><div class="kpi-label">Tax Collected</div><div class="kpi-value">'+fm(taxTotal)+'</div><div class="kpi-sub">from orders</div></div>'+
+    '<div class="kpi c1"><div class="kpi-label">Shipping Charged</div><div class="kpi-value">'+fm(shippingTotal)+'</div><div class="kpi-sub">from orders</div></div>'+
+    '<div class="kpi-section-label">Returns</div>'+
+    '<div class="kpi c2"><div class="kpi-label">Units Returned</div><div class="kpi-value">'+unitsReturned.toLocaleString()+'</div><div class="kpi-sub">'+(unitsSold?((unitsReturned/unitsSold)*100).toFixed(1):0)+'% of sold</div></div>'+
+    '<div class="kpi c2"><div class="kpi-label">Returns Amount</div><div class="kpi-value">'+fm(returnsAmount)+'</div><div class="kpi-sub">estimated</div></div>'+
+    '<div class="kpi-section-label">Costs & Profit</div>'+
+    '<div class="kpi c4"><div class="kpi-label">Cost of Goods</div><div class="kpi-value">'+fm(itemCost)+'</div><div class="kpi-sub">from P&L data</div></div>'+
+    '<div class="kpi c4"><div class="kpi-label">Fees & Commissions</div><div class="kpi-value">'+fm(feesTotal)+'</div><div class="kpi-sub">channel + transaction</div></div>'+
+    '<div class="kpi c3"><div class="kpi-label">Net Profit / Loss</div><div class="kpi-value" style="color:'+(profit>=0?'var(--green)':'var(--pink)')+'">'+fm(profit)+'</div><div class="kpi-sub">from P&L data</div></div>'+
+    '<div class="kpi-section-label">Orders by Status</div>'+
+    Object.entries(sc).map(([s,n])=>'<div class="kpi c1" style="padding:14px 18px"><div class="kpi-label">'+s+'</div><div class="kpi-value" style="font-size:22px">'+n.toLocaleString()+'</div><div class="kpi-sub">'+(allOrders.length?((n/allOrders.length)*100).toFixed(1):0)+'%</div></div>').join('')+
+    '</div>';
 }
+function buildOrderTable(){
+  return '<div style="margin-top:'+(currentView==='both'?'32px':'0')+'">'+
+    '<div class="table-toolbar">'+
+    '<div style="font-size:14px;font-weight:700">Order Details</div>'+
+    '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">'+
+    '<input class="tbl-search" id="tblSearch" placeholder="Filter orders..." oninput="filterTable()" autocomplete="off">'+
+    '<span class="tbl-meta" id="tblMeta"></span>'+
+    '<button class="btn-export" onclick="exportCSV()">Export CSV</button>'+
+    '</div></div>'+
+    '<div class="table-wrap"><table>'+
+    '<thead><tr>'+
+    '<th onclick="sortTable(\'ID\')">Order ID</th>'+
+    '<th onclick="sortTable(\'TimeOfOrder\')">Date</th>'+
+    '<th onclick="sortTable(\'GrandTotal\')">Revenue</th>'+
+    '<th>Status</th><th>Units</th><th>Tax</th><th>Shipping</th>'+
+    '<th>Cost</th><th>Fees</th><th>Profit</th>'+
+    '</tr></thead><tbody id="tblBody"></tbody></table></div>'+
+    '<div class="pagination" id="pagination"></div></div>';
+}
+function renderTableRows(){
+  const start=(curPage-1)*PAGE_SIZE;
+  const rows=filteredOrders.slice(start,start+PAGE_SIZE);
+  const meta=document.getElementById('tblMeta');
+  if(meta)meta.textContent=filteredOrders.length.toLocaleString()+' orders';
+  const tbody=document.getElementById('tblBody');
+  if(!tbody)return;
+  tbody.innerHTML=rows.map(o=>{
+    const p=pnlMap[o.ID]||{};
+    const units=(o.Items||[]).reduce((s,i)=>s+(i.Qty||0),0);
+    const cost=parseFloat(p.ItemCost||p.ItemCostUsd||0);
+    const fees=parseFloat(p.Comission||0)+parseFloat(p.TransactionFee||0)+parseFloat(p.PostingFee||0);
+    const pl=parseFloat(p.ProfitLoss||p.ProfitLossUsd||0);
+    const sc=o.StatusCode;
+    const bc=sc===2?'b-green':sc===3?'b-blue':sc===4||sc===8?'b-pink':sc===5?'b-amber':'b-gray';
+    return '<tr>'+
+      '<td class="mono" style="color:var(--accent)">#'+o.ID+'</td>'+
+      '<td class="mono">'+fdisp(o.TimeOfOrder||o.CreatedOn)+'</td>'+
+      '<td style="font-weight:700">'+fm(o.GrandTotal)+'</td>'+
+      '<td><span class="badge '+bc+'">'+(OS[sc]||'?')+'</span></td>'+
+      '<td class="mono">'+units+'</td>'+
+      '<td class="mono">'+fm(o.TaxTotal)+'</td>'+
+      '<td class="mono">'+fm(o.ShippingTotal)+'</td>'+
+      '<td class="mono">'+(cost?fm(cost):'<span style="color:var(--muted)">-</span>')+'</td>'+
+      '<td class="mono">'+(fees?fm(fees):'<span style="color:var(--muted)">-</span>')+'</td>'+
+      '<td class="mono" style="color:'+(pl>0?'var(--green)':pl<0?'var(--pink)':'var(--muted)')+';font-weight:700">'+
+      (p.ProfitLoss!==undefined?fm(pl):'<span style="color:var(--muted)">-</span>')+'</td>'+
+      '</tr>';
+  }).join('')||'<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:32px">No orders match filter</td></tr>';
+  const pages=Math.ceil(filteredOrders.length/PAGE_SIZE);
+  const pg=document.getElementById('pagination');
+  if(!pg)return;
+  if(pages<=1){pg.innerHTML='';return}
+  pg.innerHTML='<button class="pg-btn" onclick="goPage('+(curPage-1)+')" '+(curPage===1?'disabled':'')+'>Prev</button><span>Page '+curPage+' of '+pages+'</span><button class="pg-btn" onclick="goPage('+(curPage+1)+')" '+(curPage===pages?'disabled':'')+'>Next</button>';
+}
+function filterTable(){
+  const q=document.getElementById('tblSearch').value.toLowerCase();
+  filteredOrders=q?allOrders.filter(o=>String(o.ID).includes(q)||[o.FirstName,o.LastName,o.CustomerEmail].join(' ').toLowerCase().includes(q)):[...allOrders];
+  curPage=1;renderTableRows();
+}
+function sortTable(key){
+  if(sortKey===key)sortAsc=!sortAsc;else{sortKey=key;sortAsc=key!=='TimeOfOrder'&&key!=='GrandTotal'}
+  filteredOrders.sort((a,b)=>{let av=a[key],bv=b[key];if(key==='GrandTotal'){av=parseFloat(av||0);bv=parseFloat(bv||0)}if(av<bv)return sortAsc?-1:1;if(av>bv)return sortAsc?1:-1;return 0});
+  curPage=1;renderTableRows();
+}
+function goPage(p){const pages=Math.ceil(filteredOrders.length/PAGE_SIZE);curPage=Math.max(1,Math.min(p,pages));renderTableRows();document.getElementById('reportSection').scrollIntoView({behavior:'smooth',block:'start'})}
+function exportCSV(){
+  const rows=[['Order ID','Date','Revenue','Status','Units','Tax','Shipping','Cost of Goods','Fees','Profit/Loss']];
+  allOrders.forEach(o=>{
+    const p=pnlMap[o.ID]||{};
+    const units=(o.Items||[]).reduce((s,i)=>s+(i.Qty||0),0);
+    const cost=parseFloat(p.ItemCost||p.ItemCostUsd||0);
+    const fees=parseFloat(p.Comission||0)+parseFloat(p.TransactionFee||0)+parseFloat(p.PostingFee||0);
+    const pl=parseFloat(p.ProfitLoss||p.ProfitLossUsd||0);
+    rows.push([o.ID,(o.TimeOfOrder||o.CreatedOn||'').split('T')[0],parseFloat(o.GrandTotal||0).toFixed(2),OS[o.StatusCode]||o.StatusCode,units,parseFloat(o.TaxTotal||0).toFixed(2),parseFloat(o.ShippingTotal||0).toFixed(2),cost.toFixed(2),fees.toFixed(2),pl.toFixed(2)]);
+  });
+  const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob([csv],{type:'text/csv'})),download:selectedCompany.name.replace(/\s+/g,'_')+'_'+dateFrom+'_'+dateTo+'.csv'});
+  a.click();URL.revokeObjectURL(a.href);
+}
+function fd(d){return d.toISOString().split('T')[0]}
+function fdisp(s){if(!s)return'-';const[y,m,dd]=(s.split('T')[0]).split('-');return m+'/'+dd+'/'+y}
+function fm(n){return'$'+parseFloat(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function setProgress(pct,label){document.getElementById('progressFill').style.width=pct+'%';document.getElementById('progressLabel').textContent=label}
+function setConn(state,txt){document.getElementById('connDot').className='dot '+state;document.getElementById('connTxt').textContent=txt}
 </script>
 </body>
 </html>
