@@ -23,8 +23,8 @@ console.log('Serving static from:', path.join(__dirname, 'public'));
 // SellerCloud config
 const SC_BASE     = 'https://blny.api.sellercloud.com/rest/api';
 const SC_BASE_PNL = 'https://blny.api.sellercloud.com/rest/api';   // P&L uses different base path
-const SC_USER     = process.env.SC_USERNAME || ;
-const SC_PASS     = process.env.SC_PASSWORD || ;
+const SC_USER     = process.env.SC_USERNAME ;
+const SC_PASS     = process.env.SC_PASSWORD ;
 
 // Token cache
 let cachedToken = null;
