@@ -107,6 +107,7 @@ tbody tr:hover td{background:var(--s2)}
 <div class="status-bar">
   <div class="dot spin" id="connDot"></div>
   <span id="connTxt">Connecting...</span>
+  <form method="POST" action="/logout" style="margin-left:auto"><button type="submit" style="background:transparent;border:1px solid var(--border);color:var(--muted);padding:4px 14px;border-radius:6px;cursor:pointer;font-family:'DM Mono',monospace;font-size:11px;transition:all .15s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">Sign out</button></form>
 </div>
 <main>
   <h1>Sales Reports</h1>
@@ -153,6 +154,7 @@ tbody tr:hover td{background:var(--s2)}
 </main>
 <script>
 const GATEWAY='';
+const API_SECRET='__API_SECRET__';
 let selectedCompany=null,dateFrom=null,dateTo=null;
 let allOrders=[],pnlMap={},filteredOrders=[];
 let sortKey='TimeOfOrder',sortAsc=false,curPage=1;
@@ -163,7 +165,7 @@ const OS={0:'Unknown',1:'Cart',2:'Completed',3:'In Process',4:'Problem',5:'On Ho
 window.onload=async()=>{await init()};
 async function init(){
   try{
-    const r=await fetch(GATEWAY+'/api/companies');
+    const r=await fetch(GATEWAY+'/api/companies',{headers:{'x-api-secret':API_SECRET}});
     if(!r.ok)throw new Error('HTTP '+r.status);
     const d=await r.json();
     if(d.error)throw new Error(d.error);
@@ -240,7 +242,7 @@ async function generate(){
     for(let i=0;i<ids.length;i+=bs){
       const batch=ids.slice(i,i+bs);
       setProgress(50+Math.round((i/ids.length)*45),'Fetching P&L... '+Math.min(i+bs,ids.length)+' of '+ids.length);
-      const r=await fetch(GATEWAY+'/api/orders/pnl',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderIds:batch})});
+      const r=await fetch(GATEWAY+'/api/orders/pnl',{method:'POST',headers:{'Content-Type':'application/json','x-api-secret':API_SECRET},body:JSON.stringify({orderIds:batch})});
       if(!r.ok)throw new Error('P&L HTTP '+r.status);
       const data=await r.json();
       if(data.error)throw new Error(data.error);
@@ -295,10 +297,9 @@ function buildSummary(){
     '<div class="kpi-section-label">Returns</div>'+
     '<div class="kpi c2"><div class="kpi-label">Units Returned</div><div class="kpi-value">'+unitsReturned.toLocaleString()+'</div><div class="kpi-sub">'+(unitsSold?((unitsReturned/unitsSold)*100).toFixed(1):0)+'% of sold</div></div>'+
     '<div class="kpi c2"><div class="kpi-label">Returns Amount</div><div class="kpi-value">'+fm(returnsAmount)+'</div><div class="kpi-sub">estimated</div></div>'+
-    '<div class="kpi-section-label">Costs & Profit</div>'+
+    '<div class="kpi-section-label">Costs</div>'+
     '<div class="kpi c4"><div class="kpi-label">Cost of Goods</div><div class="kpi-value">'+fm(itemCost)+'</div><div class="kpi-sub">from P&L data</div></div>'+
     '<div class="kpi c4"><div class="kpi-label">Fees & Commissions</div><div class="kpi-value">'+fm(feesTotal)+'</div><div class="kpi-sub">channel + transaction</div></div>'+
-    '<div class="kpi c3"><div class="kpi-label">Net Profit / Loss</div><div class="kpi-value" style="color:'+(profit>=0?'var(--green)':'var(--pink)')+'">'+fm(profit)+'</div><div class="kpi-sub">from P&L data</div></div>'+
     '<div class="kpi-section-label">Orders by Status</div>'+
     Object.entries(sc).map(([s,n])=>'<div class="kpi c1" style="padding:14px 18px"><div class="kpi-label">'+s+'</div><div class="kpi-value" style="font-size:22px">'+n.toLocaleString()+'</div><div class="kpi-sub">'+(allOrders.length?((n/allOrders.length)*100).toFixed(1):0)+'%</div></div>').join('')+
     '</div>'+buildPnLRows(grossRevenue,feesTotal,returnsAmount,itemCost,profit);
